@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\Microservice_Architecture</DockerfileContext>
+    <UserSecretsId>5eb7e2c9-9c8e-49a2-9700-24256c176a40</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.1" />
+    <PackageReference Include="MMLib.SwaggerForOcelot" Version="5.2.0" />
+    <PackageReference Include="Ocelot" Version="18.0.0" />
+  </ItemGroup>
+
+</Project>

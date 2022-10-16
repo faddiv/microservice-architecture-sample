@@ -1,0 +1,4 @@
+GET https://localhost:7057/swagger/v1/swagger.json
+
+
+GET https://localhost:7057/

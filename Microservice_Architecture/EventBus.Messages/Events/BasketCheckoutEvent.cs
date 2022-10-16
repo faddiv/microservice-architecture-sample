@@ -1,0 +1,35 @@
+namespace EventBus.Messages.Events
+{
+    public class BasketCheckoutEvent
+    {
+        public BasketCheckoutEvent()
+        {
+            Id = Guid.NewGuid();
+            CreatedAt = DateTime.UtcNow;
+        }
+        public Guid Id { get; set; }
+        public DateTime CreatedAt { get; set; }
+
+        #region EventData
+
+        public string UserName { get; set; }
+        public decimal TotalPrice { get; set; }
+
+        // BillingAddress
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string EmailAddress { get; set; }
+        public string AddressLine { get; set; }
+        public string Country { get; set; }
+        public string State { get; set; }
+        public string ZipCode { get; set; }
+
+        // Payment
+        public string CardName { get; set; }
+        public string CardNumber { get; set; }
+        public string Expiration { get; set; }
+        public string CVV { get; set; }
+        public int PaymentMethod { get; set; }
+        #endregion
+    }
+}

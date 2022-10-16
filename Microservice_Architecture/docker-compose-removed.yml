@@ -1,0 +1,13 @@
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server
+    container_name: mssql
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=asdfASDF1234
+    volumes:
+      - "d:/Databases/MSSQL_Docker/data:/var/opt/mssql/data"
+      - "d:/Databases/MSSQL_Docker/log:/var/opt/mssql/log"
+      - "d:/Databases/MSSQL_Docker/backup:/var/opt/mssql/backup"

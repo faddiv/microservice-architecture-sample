@@ -1,0 +1,126 @@
+version: '3.4'
+
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    command: mongod --directoryperdb
+    ports:
+      - "27017:27017"
+    volumes:
+      - "d:/Databases/MongoDB:/data/db"
+
+  redisdb:
+    image: redis
+    container_name: redisdb
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  basket.api:
+    image: ${DOCKER_REGISTRY-}basketapi
+    container_name: basketapi
+    depends_on:
+      - redisdb
+      - rabbitmq
+      - discount.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ConnectionStrings__redisdb=redisdb:6379
+      - ConnectionStrings__DiscountApi=http://discountapi
+      - ConnectionStrings__rabbitmq=amqp://guest:guest@rabbitmq:5672
+    ports:
+      - "5002:80"
+      - "5003:443"
+    build:
+      context: .
+      dockerfile: Basket.Api/Dockerfile
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+            
+  catalog.api:
+    image: ${DOCKER_REGISTRY-}catalogapi
+    container_name: catalogapi
+    depends_on:
+      - mongodb
+    environment:
+      - ConnectionStrings__Catalog=mongodb://mongodb:27017
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+    ports:
+      - "5000:80"
+      - "5001:443"
+    build:
+      context: .
+      dockerfile: Catalog.API/Dockerfile
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
+  discount.api:
+    image: ${DOCKER_REGISTRY-}dicountapi
+    container_name: discountapi
+    depends_on:
+      - mongodb
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ConnectionStrings__DiscountDB=mongodb://mongodb:27017
+    ports:
+      - "5004:80"
+      - "5005:443"
+    build:
+      context: .
+      dockerfile: Discount.API/Dockerfile
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+      
+  ordering.api:
+    image: ${DOCKER_REGISTRY-}orderingapi
+    container_name: orderingapi
+    depends_on:
+      - rabbitmq
+      - mongodb
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ConnectionStrings__rabbitmq=amqp://guest:guest@rabbitmq:5672
+      - ConnectionStrings__Ordering=mongodb://mongodb:27017
+    ports:
+      - "5006:80"
+      - "5007:443"
+    build:
+      context: .
+      dockerfile: Ordering.Api/Dockerfile
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+   
+  ocelot.api.gateway:
+    image: ${DOCKER_REGISTRY-}ocelotapigateway
+    depends_on:
+      - catalog.api
+      - discount.api
+      - basket.api
+      - ordering.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+    ports:
+      - "5010:80"
+      - "5011:443"
+    build:
+      context: .
+      dockerfile: OctelotApiGateway/Dockerfile
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
